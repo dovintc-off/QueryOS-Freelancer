@@ -1,14 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net9.0</TargetFramework>
-    <RollForward>Major</RollForward>
-    <PublishReadyToRun>false</PublishReadyToRun>
-    <TieredCompilation>false</TieredCompilation>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <ApplicationIcon>Icon.ico</ApplicationIcon>
+    <ApplicationIcon>assets/build/icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="assets/build/icon.ico" />
@@ -16,13 +15,19 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="assets/build/icon.ico">
-      <LogicalName>Icon.ico</LogicalName>
+      <LogicalName>assets/build/icon.ico</LogicalName>
     </EmbeddedResource>
     <EmbeddedResource Include="assets/build/icon.bmp">
-      <LogicalName>Icon.bmp</LogicalName>
+      <LogicalName>assets/build/icon.bmp</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Update="assets\font\**\*.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="FontStashSharp.MonoGame" Version="1.6.1" />
     <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.*" />
     <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.*" />
   </ItemGroup>

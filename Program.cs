@@ -1,2 +1,5 @@
-﻿using var game = new QueryOS_Freelancer.Main.Main();
+﻿// Copyright (C) 2026 Dovintc
+// This project is licensed under the GNU General Public License, version 3.0 only.
+// The full license text is available at: https://www.gnu.org/licenses/gpl-3.0.txt
+using var game = new QueryOS_Freelancer.Main.Main();
 game.Run();

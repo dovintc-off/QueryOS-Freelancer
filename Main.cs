@@ -1,7 +1,9 @@
 ﻿// Copyright (C) 2026 Dovintc
 // This project is licensed under the GNU General Public License, version 3.0 only.
 // The full license text is available at: https://gnu.org
-using System;
+global using Console = QueryOS_Freelancer._Console.Console;
+global using LogType = QueryOS_Freelancer._Console.LogType;
+
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -21,6 +23,7 @@ public class Main : Game {
     }
 
     protected override void Initialize() {
+        Console.Log(LogType.Info, "Инициализация игры...");
         Window.Title = "QueryOS: Freelancer";
         Window.AllowUserResizing = true;
         Window.ClientSizeChanged += OnWindowsResize;
@@ -36,17 +39,21 @@ public class Main : Game {
 
         base.Initialize();
 
+        Console.Log(LogType.Info, "Инициализация консоли...");
+        Console.Initialize(this);
         UpdateGlobalWindowSize();
     }
 
     protected override void LoadContent() {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
         FontRegistry.Initialize();
+        Console.Log(LogType.Info, "Загрузка контента завершена");
     }
 
     protected override void Update(GameTime gameTime) {
         ValidateInitialization();
-        if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+        Console.Update(gameTime);
+        if (!Console.IsOpen && (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape)))
             Exit();
 
         base.Update(gameTime);
@@ -66,6 +73,8 @@ public class Main : Game {
         _spriteBatch.End();
 
         base.Draw(gameTime);
+
+        Console.Draw(_spriteBatch, GraphicsDevice);
     }
 
     protected override void UnloadContent() {

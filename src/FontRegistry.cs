@@ -4,6 +4,7 @@
 using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using QueryOS_Freelancer.Loc;
 
 namespace QueryOS_Freelancer.TextRendering;
 
@@ -29,7 +30,7 @@ public static class FontRegistry {
             foreach (var entry in FontPaths) {
                 string path = Path.Combine(baseDirectory, entry.Value);
                 if (!File.Exists(path))
-                    throw new FileNotFoundException($"Font file for {entry.Key} was not found.", path);
+                    throw new FileNotFoundException(Localization.Get("Crash.FontFileNotFound", [entry.Key]), path);
 
                 var fontSystem = new FontSystem();
                 fontSystem.AddFont(File.ReadAllBytes(path));
@@ -44,13 +45,13 @@ public static class FontRegistry {
 
     public static SpriteFontBase Get(Font font, int size) {
         if (size <= 0)
-            throw new ArgumentOutOfRangeException(nameof(size), "Font size must be greater than zero.");
+            throw new ArgumentOutOfRangeException(nameof(size), Localization.Get("Crash.FontIsSmall"));
 
         lock (SyncRoot) {
             if (!_initialized)
-                throw new InvalidOperationException("FontRegistry.Initialize() must be called before requesting fonts.");
+                throw new InvalidOperationException(Localization.Get("Crash.ManagerFontsNotInited"));
             if (!FontSystems.TryGetValue(font, out FontSystem? fontSystem))
-                throw new ArgumentOutOfRangeException(nameof(font), font, "Font is not registered.");
+                throw new ArgumentOutOfRangeException(nameof(font), font, Localization.Get("Crash.FontNotReg"));
 
             var key = (font, size);
             if (FontCache.TryGetValue(key, out SpriteFontBase? cachedFont))

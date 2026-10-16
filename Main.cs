@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using QueryOS_Freelancer.TextRendering;
+using QueryOS_Freelancer.Loc;
 
 namespace QueryOS_Freelancer.Main;
 
@@ -23,7 +24,7 @@ public class Main : Game {
     }
 
     protected override void Initialize() {
-        Console.Log(LogType.Info, "Инициализация игры...");
+        Console.Log(LogType.Info, Localization.Get("Log.GameLoading"));
         Window.Title = "QueryOS: Freelancer";
         Window.AllowUserResizing = true;
         Window.ClientSizeChanged += OnWindowsResize;
@@ -39,7 +40,7 @@ public class Main : Game {
 
         base.Initialize();
 
-        Console.Log(LogType.Info, "Инициализация консоли...");
+        Console.Log(LogType.Info, Localization.Get("Log.InitConsole"));
         Console.Initialize(this);
         UpdateGlobalWindowSize();
     }
@@ -47,7 +48,7 @@ public class Main : Game {
     protected override void LoadContent() {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
         FontRegistry.Initialize();
-        Console.Log(LogType.Info, "Загрузка контента завершена");
+        Console.Log(LogType.Info, Localization.Get("Log.LoadContentSuccessfully"));
     }
 
     protected override void Update(GameTime gameTime) {

@@ -10,6 +10,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using QueryOS_Freelancer.TextRendering;
 using QueryOS_Freelancer.Loc;
+using QueryOS_Freelancer.Core.FileSystem;
 
 namespace QueryOS_Freelancer.Main;
 
@@ -32,7 +33,7 @@ public class Main : Game {
         IsFixedTimeStep = false;
         _graphics.SynchronizeWithVerticalRetrace = false;
         _graphics.HardwareModeSwitch = false;
-        _graphics.IsFullScreen = false;
+        _graphics.IsFullScreen = true;
 
         _graphics.PreferredBackBufferWidth = Window.ClientBounds.Width;
         _graphics.PreferredBackBufferHeight = Window.ClientBounds.Height;
@@ -42,7 +43,13 @@ public class Main : Game {
 
         Console.Log(LogType.Info, Localization.Get("Log.InitConsole"));
         Console.Initialize(this);
+
+        SystemFileManager.Initialize();
+        Console.Log(LogType.Info, Localization.Get("Log.InitFileSystem"));
+
         UpdateGlobalWindowSize();
+
+        GlobalStates.GlobalStates.User.stage = 1;
     }
 
     protected override void LoadContent() {

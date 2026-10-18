@@ -86,9 +86,10 @@ public static class Console {
         _previousKeyboardState = Keyboard.GetState();
     }
 
-    public static void Log(LogType type, string message, [CallerFilePath] string callerPath = "") {
+    public static void Log(LogType type, string message, bool critical, [CallerFilePath] string callerPath = "") {
         ArgumentNullException.ThrowIfNull(message);
         string fileName = Path.GetFileName(callerPath);
+
         lock (SyncRoot) {
             _logs.Add(new LogEntry {
                 Type = type,
@@ -99,7 +100,11 @@ public static class Console {
             if (_logs.Count > MaxLogs)
                 _logs.RemoveAt(0);
         }
+        
+        if (critical) Environment.Exit(1);
     }
+
+    public static void Log(LogType type, string message, [CallerFilePath] string callerPath = "") => Log(type, message, false, callerPath: callerPath);
 
     public static void Write(string message, [CallerFilePath] string path = "") => Log(LogType.Info, message, path);
 

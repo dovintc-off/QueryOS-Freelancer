@@ -14,7 +14,8 @@ public static class FontRegistry {
         [Font.PlanetKosmos] = Path.Combine("assets", "font", "planet-kosmos", "font.ttf"),
         [Font.Sonderpaedagogik] = Path.Combine("assets", "font", "sonderpaedagogik", "font.otf"),
         [Font.Tahoma] = Path.Combine("assets", "font", "tahoma", "font.ttf"),
-        [Font.Tokushupikuse] = Path.Combine("assets", "font", "tokushupikuse", "font.otf")
+        [Font.Tokushupikuse] = Path.Combine("assets", "font", "tokushupikuse", "font.otf"),
+        [Font.Consolas] = Path.Combine("assets", "font", "consolas", "font.ttf")
     };
     private static readonly Dictionary<Font, FontSystem> FontSystems = new();
     private static readonly Dictionary<(Font Font, int Size), SpriteFontBase> FontCache = new();
@@ -76,5 +77,6 @@ public enum Font {
     PlanetKosmos,
     Sonderpaedagogik,
     Tahoma,
-    Tokushupikuse
+    Tokushupikuse,
+    Consolas
 }

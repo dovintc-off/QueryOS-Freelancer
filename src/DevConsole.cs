@@ -1,3 +1,6 @@
+// Copyright (C) 2026 Dovintc
+// This project is licensed under the GNU General Public License, version 3.0 only.
+// The full license text is available at: https://gnu.org
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -11,9 +14,9 @@ using Myra.Graphics2D.Brushes;
 using Myra.Graphics2D.UI;
 using QueryOS_Freelancer.TextRendering;
 
-namespace QueryOS_Freelancer._Console;
+namespace QueryOS_Freelancer._DevConsole;
 
-public static class Console {
+public static class DevConsole {
     private const int MaxLogs = 500;
     private const int FontSize = 18;
     private const float Padding = 10f;

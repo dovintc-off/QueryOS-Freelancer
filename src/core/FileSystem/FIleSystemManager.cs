@@ -1,24 +1,34 @@
+// Copyright (C) 2026 Dovintc
+// This project is licensed under the GNU General Public License, version 3.0 only.
+// The full license text is available at: https://gnu.org
 namespace QueryOS_Freelancer.Core.FileSystem;
+using QueryOS_Freelancer.Core._Task;
 
-using QueryOS_Freelancer._Console;
-using QueryOS_Freelancer.Loc;
 using System.IO;
 
-public static class SystemFileManager {
-    public static void Initialize(){
-        bool already = BootStrapper.Boot();
-        if (already) {
-            RealRootPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "FSR");
-        } else {
-            Console.Log(LogType.Error, Localization.Get("Crash.FileSystemNotLoaded"), true);
-        }
-        
+public class SystemFileManager : Task {    
+    public SystemFileManager() : base("FileManager"){
+        RealRootPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "FSR");
     }
 
-    public static string RealRootPath { get; private set; } = "";
-    public static string VirtualCurrentPath { get; private set; } = "/";
+    public string RealRootPath { get; private set; } = "";
+    public string VirtualCurrentPath { get; private set; } = "/";
 
-    public static void ChangeDirectory(string to) {
+    protected override void Execute(string[] args) {
+        // TODO: Localize
+        Terminal.WriteLine("[blue][ INFO ] Munting File System Root");
+
+        bool already = BootStrapper.Boot();
+        if (already) {
+            // TODO: Localize
+            Terminal.WriteLine("[ OK ] File System Root successfully mounted.");
+        } else {
+            DevConsole.Log(LogType.Error, Localization.Get("Crash.FileSystemNotLoaded"), true);
+            Stop();
+        }
+    }
+
+    public void ChangeDirectory(string to) {
         if (string.IsNullOrWhiteSpace(to)) return;
 
         string combined;
@@ -47,21 +57,29 @@ public static class SystemFileManager {
         }
     }
 
-    public static string[] ListDirectory () {
+    public string[] ListDirectory () {
         List<string> data = new List<string>(); 
+        string currentDir = Path.Combine(RealRootPath, VirtualCurrentPath.TrimStart('/'));
 
-        string[] subDirectories = Directory.GetDirectories(Path.Combine(RealRootPath, VirtualCurrentPath.TrimStart('/')));
+        if (!Directory.Exists(currentDir)) return data.ToArray();
+
+        string[] subDirectories = Directory.GetDirectories(currentDir);
         foreach (string dir in subDirectories) {
+            if (dir.EndsWith(".fold-inf") || dir.EndsWith(".inf")) continue;
+
             var meta = GetMetadata(dir, true);
             if (meta.Stage <= GlobalStates.GlobalStates.User.stage) {
                 data.Add($"{meta.Permissions}|D|{Path.GetFileName(dir)}");
             }
         }
 
-        string[] files = Directory.GetFiles(Path.Combine(RealRootPath, VirtualCurrentPath.TrimStart('/')));
+        string[] files = Directory.GetFiles(currentDir);
         foreach (string file in files) {
+            if (file.EndsWith(".inf") || file.EndsWith(".fold-inf")) continue;
+
             var meta = GetMetadata(file, false);
-            if (meta.Stage <= GlobalStates.GlobalStates.User.stage && meta.Owner == GlobalStates.GlobalStates.User.name) {
+            
+            if (meta.Stage <= GlobalStates.GlobalStates.User.stage && (meta.Owner == GlobalStates.GlobalStates.User.name || meta.Owner == "*" || meta.Owner == "root")) {
                 data.Add($"{meta.Permissions}|F|{Path.GetFileName(file)}");
             }
         }
@@ -69,7 +87,8 @@ public static class SystemFileManager {
         return data.ToArray();
     }
 
-    public static void CreateFile(string name, string content){
+
+    public void CreateFile(string name, string content){
         if (string.IsNullOrWhiteSpace(name)) return;
 
         string FilePath = Path.GetFullPath(Path.Combine(RealRootPath, VirtualCurrentPath.TrimStart('/').TrimStart('\\'), name));
@@ -77,15 +96,16 @@ public static class SystemFileManager {
             try {
                 File.WriteAllText($"{FilePath}.inf", "S:1,O:*,P:755");
                 File.WriteAllText(FilePath, content);
+                DevConsole.Log(LogType.Info, "Created!");
             } catch {
-                // TODO: лог ошибки в терминал и в консоль (на всякий)
+                DevConsole.Log(LogType.Info, ":(1)");
             }
         } else {
-            // TODO: ошибка в терминал: выход за пределы системы
+            DevConsole.Log(LogType.Info, ":(2)");
         }
     }
 
-    public static void RemoveFile(string name){
+    public void RemoveFile(string name){
         if (string.IsNullOrWhiteSpace(name)) return;
         string FilePath = Path.GetFullPath(Path.Combine(RealRootPath, VirtualCurrentPath.TrimStart('/').TrimStart('\\'), name));
         if (FilePath.StartsWith(RealRootPath)) {
@@ -94,7 +114,7 @@ public static class SystemFileManager {
         }
     } 
 
-    public static void RemoveDirectory(string name){
+    public void RemoveDirectory(string name){
         if (string.IsNullOrWhiteSpace(name)) return;
         string DirectoryPath = Path.GetFullPath(Path.Combine(RealRootPath, VirtualCurrentPath.TrimStart('/').TrimStart('\\'), name));
         if (DirectoryPath.StartsWith(RealRootPath)) {
@@ -107,7 +127,7 @@ public static class SystemFileManager {
     // TODO: Изменение разрешения у папок и файлов
     // TODO: Чтение файлов 
 
-    private static NodeMetadata GetMetadata(string path, bool isFolder) {
+    private NodeMetadata GetMetadata(string path, bool isFolder) {
         var meta = new NodeMetadata();
         if (string.IsNullOrWhiteSpace(path)) {return meta;}
 

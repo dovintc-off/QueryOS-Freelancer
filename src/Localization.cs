@@ -1,5 +1,7 @@
+// Copyright (C) 2026 Dovintc
+// This project is licensed under the GNU General Public License, version 3.0 only.
+// The full license text is available at: https://gnu.org
 using System.Globalization;
-using System.IO;
 
 namespace QueryOS_Freelancer.Loc;
 
@@ -10,7 +12,7 @@ public static class Localization {
     public static string Get(string key) {
         if (_localizedStrings.TryGetValue(key, out string? value)) {
             if (string.IsNullOrEmpty(value)) {
-                Console.Log(LogType.Warning, $"Localization key '{key}' has a null value.");
+                DevConsole.Log(LogType.Warning, $"Localization key '{key}' has a null value.");
                 return key;
             }
             return value;
@@ -26,7 +28,7 @@ public static class Localization {
         try {
             return string.Format(template, args);
         } catch (FormatException) {
-            Console.Log(LogType.Warning, $"Localization format error for key '{key}'. Check arguments count.");
+            DevConsole.Log(LogType.Warning, $"Localization format error for key '{key}'. Check arguments count.");
             return template;
         }
     }
@@ -53,7 +55,7 @@ public static class Localization {
 
         if (!File.Exists(file)) {
             if (!File.Exists(defaultFile)) {
-                Console.Log(LogType.Warning, $"Default localization file not found: {defaultFile}");
+                DevConsole.Log(LogType.Warning, $"Default localization file not found: {defaultFile}");
                 return null!;
             }
             file = defaultFile;
@@ -68,7 +70,7 @@ public static class Localization {
                 string value = parts[1].Trim();
                 _localizedStrings[key] = value;
             } else {
-                Console.Log(LogType.Warning, $"Invalid line in localization file: {line}");
+                DevConsole.Log(LogType.Warning, $"Invalid line in localization file: {line}");
             }
         }
         return _localizedStrings;

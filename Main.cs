@@ -219,7 +219,7 @@ public class Main : Game {
     [MemberNotNull(nameof(_spriteBatch))]
     private void ValidateInitialization() {
         if (_spriteBatch == null) {
-            throw new InvalidOperationException("SpriteBatch is not initialized.");
+            throw new InvalidOperationException(Localization.Get("Crash.BatchNotInit"));
         }
     }
 }
@@ -253,7 +253,7 @@ public class ConsoleTask : Task {
     }
 
     protected override void Execute(string[] args) {
-        Terminal.WriteLine("QueryOS initialized.");
+        Terminal.WriteLine(Localization.Get("OS.Console.IsInited"));
     }
 
     public override void HandleInput(string input) {
@@ -274,7 +274,7 @@ public class ConsoleTask : Task {
             Terminal.Clear();
         } 
         else if (command == "help") {
-            Terminal.WriteLine("Available commands: help, clear, cd <dir>, ls, cat <file>, echo \"<content>\" >> <filename>, exit");
+            Terminal.WriteLine(Localization.Get("OS.Console.Commands"));
         } 
         else if (command == "ls") {
             DevConsole.Log(LogType.Info, "Used `ls`");
@@ -312,14 +312,14 @@ public class ConsoleTask : Task {
                 if (!string.IsNullOrEmpty(filename)) {
                     FileManager.CreateFile(filename, content);
                 } else {
-                    Terminal.WriteLine("sh: echo: Missing filename.");
+                    Terminal.WriteLine($"{Localization.Get("OS.Console.MessedFileName")}");
                 }
             } else {
-                Terminal.WriteLine("Syntax error. Usage: echo \"content\" >> filename.txt");
+                Terminal.WriteLine(Localization.Get("OS.Console.echo.SyntaxError1"));
             }
         }
         else {
-            Terminal.WriteLine($"sh: command not found: {command}");
+            Terminal.WriteLine(Localization.Get("OS.Console.CommandNotFound", command));
         }
         
         CurrentInputBuffer = "";

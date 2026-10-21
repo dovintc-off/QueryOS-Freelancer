@@ -16,17 +16,20 @@ public class SystemFileManager : Task {
     private static int _checkedCount = 0;
 
     protected override void Execute(string[] args) {
-        DevConsole.Log(LogType.Info, "Start checking correctness of files");
-
-        List<string> Missed = GetObjectsWithMissingMetadata(RealRootPath, Path.Combine(RealRootPath));
-
-        // TODO: Localize
-        Terminal.WriteLine("[blue][ INFO ] Munting File System Root");
+        DevConsole.Log(LogType.Info, Localization.Get("Log.ValidateFSR"));
+        Terminal.WriteLine($"[blue][ INFO ] {Localization.Get("Log.ValidateFSR")}");
         
         bool already = BootStrapper.Boot();
         if (already) {
-            // TODO: Localize
-            Terminal.WriteLine("[ OK ] File System Root successfully mounted.");
+            List<string> Missed = GetObjectsWithMissingMetadata(RealRootPath, Path.Combine(RealRootPath));
+            if (Missed.Count > 0) {
+                foreach (string miss in Missed) {
+                    DevConsole.Log(LogType.Warning, Localization.Get("Log.ValidateFSRMetadataNotOk", [miss]));
+                }
+            } else {
+                DevConsole.Log(LogType.Info, Localization.Get("Log.ValidateFSROk"));
+            }
+
         } else {
             DevConsole.Log(LogType.Error, Localization.Get("Crash.FileSystemNotLoaded"), true);
             Stop();
@@ -38,11 +41,9 @@ public class SystemFileManager : Task {
         _checkedCount = 0;
         int totalObjects = Math.Max(1, Directory.EnumerateFileSystemEntries(fsr, "*", SearchOption.AllDirectories).Count() / 2);
 
-        DevConsole.Log(LogType.Info, $"Starting verification... Estimated objects to check: {totalObjects}");
+        DevConsole.Log(LogType.Info, Localization.Get("Log.StartValidateMetadataObjects", [totalObjects]));
 
         List<string> result = TraverseAndCheck(currentDir, fsr, totalObjects);
-
-        DevConsole.Log(LogType.Info, $"Verification completed! Successfully checked {_checkedCount} objects.");
         
         return result;
     }
@@ -57,7 +58,7 @@ public class SystemFileManager : Task {
                     continue;
 
                 _checkedCount++;
-                DevConsole.Log(LogType.Info, $"Checked {_checkedCount}/{totalObjects}: {Path.GetFileName(file)}");
+                DevConsole.Log(LogType.Info, Localization.Get("Log.CheckedNfromNasfile", [_checkedCount, totalObjects, Path.GetFileName(file)]));
 
                 if (!File.Exists(file + ".inf")) {
                     string virtualPath = file.Replace(fsrRoot, "").Replace("\\", "/");
@@ -81,7 +82,7 @@ public class SystemFileManager : Task {
             }
         }
         catch (Exception ex) {
-            DevConsole.Log(LogType.Warning, $"Some error in verification: {ex}");
+            DevConsole.Log(LogType.Warning, Localization.Get("Log.FSRValidatingError", ex));
         }
 
         return missingObjects;
@@ -102,7 +103,8 @@ public class SystemFileManager : Task {
         string newRealPath = Path.GetFullPath(combined);
 
         if (!newRealPath.StartsWith(RealRootPath, StringComparison.OrdinalIgnoreCase)) {
-            // TODO: Ошибка в терминал: Доступ запрещен (выход за пределы ОС)
+            Terminal.WriteLine(Localization.Get("Log.OutOfFileSystem"));
+            DevConsole.Log(LogType.Warning, Localization.Get("Log.OutOfFileSystem"));
             return;
         }
 
@@ -112,7 +114,8 @@ public class SystemFileManager : Task {
             string relative = newRealPath.Substring(RealRootPath.Length).Replace('\\', '/');
             VirtualCurrentPath = string.IsNullOrEmpty(relative) ? "/" : relative;
         } else {
-            // TODO: Ошибка в терминал: Папка не найдена
+            Terminal.WriteLine(Localization.Get("Log.FIleNotFound"));
+            DevConsole.Log(LogType.Warning, Localization.Get("Log.FIleNotFound"));
         }
     }
 
@@ -210,8 +213,8 @@ public class SystemFileManager : Task {
                         meta.Permissions = value;
                     }
                 }
-            } catch {
-                // TODO: Localize: Console.Log(LogType.Error, $"Failed to parse metadata file: {infPath}");
+            } catch (Exception ex) {
+                DevConsole.Log(LogType.Error, Localization.Get("FailedParseMetadata", [infPath, ex]));
             }
         } else {
             try {File.WriteAllText(infPath, "S:0,O:root,P:755");}

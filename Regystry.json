@@ -1,0 +1,10 @@
+{   
+    "PATH" : {
+        "python3": "FSR/system/programms/python3.13.exe",
+        "codex": "FSR/system/programms/OpenAI/Codex/Codex_Terminal.exe",
+        "alias": "FSR/system/core/PATH_CONTROLLER.exe"
+    }, 
+    "alias": {
+        "python": "python3"
+    }
+}

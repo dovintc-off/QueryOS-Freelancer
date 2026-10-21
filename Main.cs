@@ -68,6 +68,7 @@ public class Main : Game {
             Background = new Myra.Graphics2D.Brushes.SolidBrush(Color.Transparent),
             TextColor = Color.Transparent,
             FocusedTextColor = Color.Transparent,
+            Cursor = null,
             HorizontalAlignment = Myra.Graphics2D.UI.HorizontalAlignment.Stretch,
             VerticalAlignment = Myra.Graphics2D.UI.VerticalAlignment.Stretch
         };
@@ -103,8 +104,6 @@ public class Main : Game {
     protected override void Update(GameTime gameTime) {
         ValidateInitialization();
         DevConsole.Update(gameTime);
-        if (!DevConsole.IsOpen && (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape)))
-            Exit();
 
         if (GlobalStates.GlobalStates.User.stage == 0) {
             dotsTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -275,7 +274,7 @@ public class ConsoleTask : Task {
             Terminal.Clear();
         } 
         else if (command == "help") {
-            Terminal.WriteLine("Available commands: help, clear, cd <dir>, ls, cat <file>, echo \"<content>\" >> <filename>");
+            Terminal.WriteLine("Available commands: help, clear, cd <dir>, ls, cat <file>, echo \"<content>\" >> <filename>, exit");
         } 
         else if (command == "ls") {
             DevConsole.Log(LogType.Info, "Used `ls`");
@@ -292,6 +291,10 @@ public class ConsoleTask : Task {
                 FileManager.ChangeDirectory(parts[1]);
             }
         } 
+
+        else if (command == "exit") {
+            throw new Exception();
+        }
 
         else if (command == "echo") {
             DevConsole.Log(LogType.Info, "Used `echo` creation syntax");

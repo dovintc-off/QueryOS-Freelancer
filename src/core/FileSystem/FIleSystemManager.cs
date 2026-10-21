@@ -13,11 +13,16 @@ public class SystemFileManager : Task {
 
     public string RealRootPath { get; private set; } = "";
     public string VirtualCurrentPath { get; private set; } = "/";
+    private static int _checkedCount = 0;
 
     protected override void Execute(string[] args) {
+        DevConsole.Log(LogType.Info, "Start checking correctness of files");
+
+        List<string> Missed = GetObjectsWithMissingMetadata(RealRootPath, Path.Combine(RealRootPath));
+
         // TODO: Localize
         Terminal.WriteLine("[blue][ INFO ] Munting File System Root");
-
+        
         bool already = BootStrapper.Boot();
         if (already) {
             // TODO: Localize
@@ -26,6 +31,60 @@ public class SystemFileManager : Task {
             DevConsole.Log(LogType.Error, Localization.Get("Crash.FileSystemNotLoaded"), true);
             Stop();
         }
+    }
+
+
+    public static List<string> GetObjectsWithMissingMetadata(string currentDir, string fsr) {
+        _checkedCount = 0;
+        int totalObjects = Math.Max(1, Directory.EnumerateFileSystemEntries(fsr, "*", SearchOption.AllDirectories).Count() / 2);
+
+        DevConsole.Log(LogType.Info, $"Starting verification... Estimated objects to check: {totalObjects}");
+
+        List<string> result = TraverseAndCheck(currentDir, fsr, totalObjects);
+
+        DevConsole.Log(LogType.Info, $"Verification completed! Successfully checked {_checkedCount} objects.");
+        
+        return result;
+    }
+    
+    private static List<string> TraverseAndCheck(string currentDir, string fsrRoot, int totalObjects) {
+        List<string> missingObjects = new List<string>();
+
+        try {
+            foreach (string file in Directory.EnumerateFiles(currentDir))
+            {
+                if (file.EndsWith(".inf") || file.EndsWith(".fold-inf"))
+                    continue;
+
+                _checkedCount++;
+                DevConsole.Log(LogType.Info, $"Checked {_checkedCount}/{totalObjects}: {Path.GetFileName(file)}");
+
+                if (!File.Exists(file + ".inf")) {
+                    string virtualPath = file.Replace(fsrRoot, "").Replace("\\", "/");
+                    if (!virtualPath.StartsWith("/")) virtualPath = "/" + virtualPath;
+                    
+                    missingObjects.Add(virtualPath);
+                }
+            }
+
+            foreach (string dir in Directory.EnumerateDirectories(currentDir)) {
+                _checkedCount++;
+                DevConsole.Log(LogType.Info, $"Checked {_checkedCount}/{totalObjects}: {Path.GetFileName(dir)}/");
+
+                if (!File.Exists(dir + ".fold-inf")) {
+                    string virtualPath = dir.Replace(fsrRoot, "").Replace("\\", "/");
+                    if (!virtualPath.StartsWith("/")) virtualPath = "/" + virtualPath;
+
+                    missingObjects.Add(virtualPath);
+                }
+                missingObjects.AddRange(TraverseAndCheck(dir, fsrRoot, totalObjects));
+            }
+        }
+        catch (Exception ex) {
+            DevConsole.Log(LogType.Warning, $"Some error in verification: {ex}");
+        }
+
+        return missingObjects;
     }
 
     public void ChangeDirectory(string to) {
